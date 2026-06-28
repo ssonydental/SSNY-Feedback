@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patient Feedback | Smile Services of New York</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* Ice Purple palette */
+      --bg:          #F6F4FB;
+      --card:        #FFFFFF;
+      --tint:        #F1ECF8;
+      --tint-border: #E6DFF1;
+      --header:      #2E2456;
+      --primary:     #6B57C2;
+      --primary-hover: #5A47AD;
+      --star:        #8B7FD0;
+      --lavender:    #C8B8E8;
+      --border:      #E2DCEE;
+      --text:        #1F1A30;
+      --muted:       #6E6886;
+      --green:       #2E7D32;
+      --green-bg:    #E8F5E9;
+
+      /* Tier accent borders for tags */
+      --tag-excellent:    #A593D8;   /* deeper lavender — exceptional (5★) */
+      --tag-excellent-bg: #F6F1FF;
+      --tag-good:         #B5C8B0;   /* soft sage — solid positive (4★) */
+      --tag-neu:          #D9C9A8;   /* soft sand — mixed (3★) */
+      --tag-neg:          #D9B5B5;   /* soft rose — negative (1-2★) */
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 12px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      box-shadow: 0 2px 24px rgba(46, 36, 86, 0.08);
+      max-width: 480px;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .card-header {
+      background: linear-gradient(135deg, var(--header) 0%, #3D3170 100%);
+      padding: 18px 24px;
+      text-align: center;
+      position: relative;
+    }
+
+    .card-header::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--lavender), transparent);
+      opacity: 0.6;
+    }
+
+    .practice-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 15px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.92);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .card-body {
+      padding: 28px 24px 32px;
+    }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    .heading {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--header);
+      margin-bottom: 6px;
+      text-align: center;
+    }
+
+    .sub {
+      font-size: 13.5px;
+      color: var(--muted);
+      margin-bottom: 24px;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    /* Rating block */
+    .rating-block {
+      margin-bottom: 22px;
+      background: var(--tint);
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid var(--tint-border);
+    }
+
+    .rating-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--header);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .stars-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .stars { display: flex; gap: 8px; }
+
+    .star-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 32px;
+      color: #D8D1E6;
+      line-height: 1;
+      transition: transform 0.08s, color 0.12s;
+    }
+
+    .star-btn.filled { color: var(--star); }
+    .star-btn:active { transform: scale(0.85); }
+
+    .star-hint {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 500;
+      min-width: 75px;
+      text-align: right;
+    }
+
+    /* Tags */
+    .tags-container {
+      display: none;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--tint-border);
+      animation: fadeIn 0.18s ease-out;
+    }
+
+    .tags-container.active { display: flex; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-2px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .tag-btn {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 12px;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+
+    .tag-btn[data-tier="excellent"] {
+      border-color: var(--tag-excellent);
+      background: var(--tag-excellent-bg);
+      font-weight: 500;
+    }
+    .tag-btn[data-tier="good"]     { border-color: var(--tag-good); }
+    .tag-btn[data-tier="neutral"]  { border-color: var(--tag-neu); }
+    .tag-btn[data-tier="negative"] { border-color: var(--tag-neg); }
+
+    .tag-btn:hover {
+      background: #FBF9FE;
+    }
+
+    .tag-btn.selected {
+      background: var(--header);
+      color: #FFFFFF;
+      border-color: var(--header);
+    }
+
+    /* Inputs */
+    .field-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--header);
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 60px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      resize: none;
+      outline: none;
+      margin-bottom: 16px;
+      background: var(--card);
+      transition: border-color 0.15s;
+    }
+    textarea:focus { border-color: var(--primary); }
+
+    input[type="text"] {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      margin-bottom: 24px;
+      background: var(--card);
+      transition: border-color 0.15s;
+    }
+    input:focus { border-color: var(--primary); }
+    input::placeholder, textarea::placeholder { color: #A19BB3; }
+
+    .btn-primary {
+      width: 100%;
+      background: var(--primary);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 8px;
+      padding: 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:disabled { background: #BBB3D0; cursor: default; }
+
+    /* Thanks Screen */
+    .thanks-center { text-align: center; }
+
+    .checkmark {
+      width: 54px;
+      height: 54px;
+      background: var(--green-bg);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 24px;
+      color: var(--green);
+    }
+
+    .accent-line {
+      width: 36px;
+      height: 2px;
+      background: var(--primary);
+      margin: 18px auto 0;
+    }
+
+    @media (max-width: 400px) {
+      .card-body { padding: 20px 16px; }
+      .star-btn { font-size: 28px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-header">
+    <div class="practice-name">Smile Services of New York</div>
+  </div>
+
+  <div class="card-body">
+
+    <!-- SCREEN 1: Form -->
+    <div class="screen active" id="screen-form">
+      <h1 class="heading">How did we do today?</h1>
+      <p class="sub">Take 15 seconds to let us know how your visit went.</p>
+
+      <!-- Doctor & Care -->
+      <div class="rating-block">
+        <div class="stars-row">
+          <span class="rating-label">Your Doctor &amp; Care</span>
+          <div class="stars" id="stars-doctor" data-group="doctor"></div>
+          <div class="star-hint" id="hint-doctor"></div>
+        </div>
+        <div class="tags-container" id="tags-doctor"></div>
+      </div>
+
+      <!-- Team Communication -->
+      <div class="rating-block">
+        <div class="stars-row">
+          <span class="rating-label">Team Communication</span>
+          <div class="stars" id="stars-communication" data-group="communication"></div>
+          <div class="star-hint" id="hint-communication"></div>
+        </div>
+        <div class="tags-container" id="tags-communication"></div>
+      </div>
+
+      <!-- Overall -->
+      <div class="rating-block">
+        <div class="stars-row">
+          <span class="rating-label">Overall Experience</span>
+          <div class="stars" id="stars-overall" data-group="overall"></div>
+          <div class="star-hint" id="hint-overall"></div>
+        </div>
+      </div>
+
+      <label class="field-label" for="comments">Any quick notes for us? (Optional)</label>
+      <textarea id="comments" maxlength="150" placeholder="Let us know..."></textarea>
+
+      <label class="field-label" for="contact">Name or Phone (Optional)</label>
+      <input type="text" id="contact" placeholder="Leave blank to remain completely anonymous" />
+
+      <button class="btn-primary" id="submit-btn" onclick="submitForm()">Submit Feedback</button>
+    </div>
+
+    <!-- SCREEN 2: Thanks -->
+    <div class="screen" id="screen-thanks">
+      <div class="thanks-center">
+        <div class="checkmark">✓</div>
+        <h1 class="heading">Thank you!</h1>
+        <p class="sub" style="margin-bottom:0">Your feedback has been received privately by our team. We review every response to help improve our office care.</p>
+        <div class="accent-line"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const FEEDBACK_ENDPOINT = 'https://formsubmit.co/smile@ssonydental.com';
+
+  const labels = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+  const ratings = { doctor: 0, communication: 0, overall: 0 };
+
+  // Tier-based tag sets
+  // Excellent (5 stars) → exceptional, above-and-beyond
+  // Good      (4 stars) → solid positive experience
+  // Neutral   (3 stars) → mixed / could be better
+  // Negative  (1-2 stars) → what went wrong
+  const tagSets = {
+    doctor: {
+      excellent: ['Truly exceptional', 'Above and beyond', 'Felt completely cared for', 'Painless'],
+      good:      ['Gentle care', 'Explained clearly', 'Pain resolved', 'Comfortable visit'],
+      neutral:   ['Felt a bit rushed', 'Wanted more detail', 'Average visit'],
+      negative:  ['Too rushed', 'Confused after', 'Pain not resolved', "Didn't listen"]
+    },
+    communication: {
+      excellent: ['Outstanding service', 'Anticipated my needs', 'Felt truly valued'],
+      good:      ['Kept me updated', 'Friendly staff', 'Clear next steps'],
+      neutral:   ['Could update more', 'Friendly but slow', 'Mixed experience'],
+      negative:  ['Left wondering', 'Long wait, no update', 'Hard to reach']
+    }
+  };
+
+  // Selected tags persist per group as a Set
+  const selectedTags = { doctor: new Set(), communication: new Set() };
+  // Track current tier per group so we know when to rebuild tags
+  const currentTier  = { doctor: null,    communication: null };
+
+  function getTier(rating) {
+    if (rating === 5) return 'excellent';
+    if (rating === 4) return 'good';
+    if (rating === 3) return 'neutral';
+    return 'negative';
+  }
+
+  function buildStars(group) {
+    const container = document.getElementById('stars-' + group);
+    container.innerHTML = '';
+    for (let i = 1; i <= 5; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'star-btn' + (i <= ratings[group] ? ' filled' : '');
+      btn.textContent = '★';
+      btn.addEventListener('click', () => pickStar(group, i));
+      container.appendChild(btn);
+    }
+  }
+
+  function renderTags(group, tier) {
+    const container = document.getElementById('tags-' + group);
+    if (!container) return;
+    container.innerHTML = '';
+    const tags = tagSets[group][tier];
+    tags.forEach(tag => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'tag-btn';
+      btn.setAttribute('data-tier', tier);
+      btn.textContent = tag;
+      btn.addEventListener('click', () => {
+        btn.classList.toggle('selected');
+        if (btn.classList.contains('selected')) {
+          selectedTags[group].add(tag);
+        } else {
+          selectedTags[group].delete(tag);
+        }
+      });
+      container.appendChild(btn);
+    });
+  }
+
+  function pickStar(group, n) {
+    ratings[group] = n;
+    buildStars(group);
+    document.getElementById('hint-' + group).textContent = labels[n];
+
+    // Only doctor & communication have tags
+    if (!tagSets[group]) return;
+
+    const newTier = getTier(n);
+    const tagsContainer = document.getElementById('tags-' + group);
+
+    // Rebuild tags only when crossing a tier boundary
+    if (currentTier[group] !== newTier) {
+      selectedTags[group].clear();
+      renderTags(group, newTier);
+      currentTier[group] = newTier;
+    }
+
+    tagsContainer.classList.add('active');
+  }
+
+  function getSelectedTags(group) {
+    if (!selectedTags[group] || selectedTags[group].size === 0) return 'None';
+    return Array.from(selectedTags[group]).join(', ');
+  }
+
+  async function submitForm() {
+    const btn = document.getElementById('submit-btn');
+    const comments = document.getElementById('comments').value.trim();
+    const contact = document.getElementById('contact').value.trim();
+
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+
+    const formatLine = (val) => val ? '★'.repeat(val) + ' (' + labels[val] + ')' : 'Not rated';
+
+    try {
+      await fetch(FEEDBACK_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          doctor_rating:        formatLine(ratings.doctor),
+          doctor_tags:          getSelectedTags('doctor'),
+          communication_rating: formatLine(ratings.communication),
+          communication_tags:   getSelectedTags('communication'),
+          overall_rating:       formatLine(ratings.overall),
+          quick_notes:          comments || 'None',
+          contact_info:         contact || 'Anonymous',
+          _subject:             'SSONY Fast Feedback — ' + (contact || 'Anonymous')
+        })
+      });
+    } catch (_) {}
+
+    document.getElementById('screen-form').classList.remove('active');
+    document.getElementById('screen-thanks').classList.add('active');
+  }
+
+  ['doctor', 'communication', 'overall'].forEach(buildStars);
+</script>
+
+</body>
+</html>

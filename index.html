@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2E2456" />
   <title>Patient Feedback | Smile Services of New York</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
@@ -38,11 +39,14 @@
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
+      min-height: 100dvh;   /* handles mobile browser URL bar */
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       padding: 24px 12px;
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior-y: contain;   /* stops Android pull-to-refresh */
     }
 
     .card {
@@ -122,20 +126,36 @@
 
     .stars-row {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
     }
 
-    .stars { display: flex; gap: 8px; }
+    .stars-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .stars { display: flex; gap: 4px; }
 
     .star-btn {
       background: none;
       border: none;
       cursor: pointer;
-      font-size: 32px;
+      font-size: 34px;
       color: #D8D1E6;
       line-height: 1;
+      padding: 6px 4px;
+      min-width: 48px;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: transform 0.08s, color 0.12s;
+      touch-action: manipulation;
+      font-family: 'Inter', 'Segoe UI Symbol', 'Apple Color Emoji', system-ui, sans-serif;
     }
 
     .star-btn.filled { color: var(--star); }
@@ -171,11 +191,14 @@
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 20px;
-      padding: 5px 12px;
-      font-size: 12px;
+      padding: 8px 14px;
+      font-size: 13px;
       color: var(--text);
       cursor: pointer;
       transition: all 0.12s;
+      min-height: 36px;
+      font-family: 'Inter', sans-serif;
+      touch-action: manipulation;
     }
 
     .tag-btn[data-tier="excellent"] {
@@ -208,12 +231,12 @@
 
     textarea {
       width: 100%;
-      min-height: 60px;
+      min-height: 70px;
       border: 1.5px solid var(--border);
       border-radius: 8px;
-      padding: 10px 12px;
+      padding: 12px 14px;
       font-family: 'Inter', sans-serif;
-      font-size: 14px;
+      font-size: 16px;
       color: var(--text);
       resize: none;
       outline: none;
@@ -227,9 +250,9 @@
       width: 100%;
       border: 1.5px solid var(--border);
       border-radius: 8px;
-      padding: 10px 12px;
+      padding: 12px 14px;
       font-family: 'Inter', sans-serif;
-      font-size: 14px;
+      font-size: 16px;
       color: var(--text);
       outline: none;
       margin-bottom: 24px;
@@ -247,10 +270,11 @@
       border-radius: 8px;
       padding: 14px;
       font-family: 'Inter', sans-serif;
-      font-size: 15px;
+      font-size: 16px;
       font-weight: 600;
       cursor: pointer;
       transition: background 0.15s, transform 0.1s;
+      touch-action: manipulation;
     }
     .btn-primary:hover { background: var(--primary-hover); }
     .btn-primary:active { transform: scale(0.98); }
@@ -279,9 +303,11 @@
       margin: 18px auto 0;
     }
 
-    @media (max-width: 400px) {
-      .card-body { padding: 20px 16px; }
-      .star-btn { font-size: 28px; }
+    @media (max-width: 420px) {
+      .card-body { padding: 22px 18px 28px; }
+      .heading { font-size: 22px; }
+      .star-btn { font-size: 30px; }
+      .rating-block { padding: 12px; }
     }
   </style>
 </head>
@@ -303,8 +329,10 @@
       <div class="rating-block">
         <div class="stars-row">
           <span class="rating-label">Your Doctor &amp; Care</span>
-          <div class="stars" id="stars-doctor" data-group="doctor"></div>
-          <div class="star-hint" id="hint-doctor"></div>
+          <div class="stars-line">
+            <div class="stars" id="stars-doctor" data-group="doctor"></div>
+            <div class="star-hint" id="hint-doctor"></div>
+          </div>
         </div>
         <div class="tags-container" id="tags-doctor"></div>
       </div>
@@ -313,8 +341,10 @@
       <div class="rating-block">
         <div class="stars-row">
           <span class="rating-label">Team Communication</span>
-          <div class="stars" id="stars-communication" data-group="communication"></div>
-          <div class="star-hint" id="hint-communication"></div>
+          <div class="stars-line">
+            <div class="stars" id="stars-communication" data-group="communication"></div>
+            <div class="star-hint" id="hint-communication"></div>
+          </div>
         </div>
         <div class="tags-container" id="tags-communication"></div>
       </div>
@@ -323,8 +353,10 @@
       <div class="rating-block">
         <div class="stars-row">
           <span class="rating-label">Overall Experience</span>
-          <div class="stars" id="stars-overall" data-group="overall"></div>
-          <div class="star-hint" id="hint-overall"></div>
+          <div class="stars-line">
+            <div class="stars" id="stars-overall" data-group="overall"></div>
+            <div class="star-hint" id="hint-overall"></div>
+          </div>
         </div>
       </div>
 
@@ -332,7 +364,7 @@
       <textarea id="comments" maxlength="150" placeholder="Let us know..."></textarea>
 
       <label class="field-label" for="contact">Name or Phone (Optional)</label>
-      <input type="text" id="contact" placeholder="Leave blank to remain completely anonymous" />
+      <input type="text" id="contact" placeholder="Leave blank to stay anonymous" />
 
       <button class="btn-primary" id="submit-btn" onclick="submitForm()">Submit Feedback</button>
     </div>

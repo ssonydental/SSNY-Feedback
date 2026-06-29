@@ -383,7 +383,12 @@
 </div>
 
 <script>
-  const FEEDBACK_ENDPOINT = 'https://formsubmit.co/smile@ssonydental.com';
+  // ── CONFIG ──────────────────────────────────────────────────────────────────
+  // Google Apps Script Web App URL. Replace with your deployed URL.
+  // Setting Content-Type to text/plain bypasses the CORS preflight that
+  // Apps Script doesn't handle — the body is still JSON, parsed server-side.
+  const FEEDBACK_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzdzQxG6HDRDTmVgGtwtQt-ImqzliWTG-Hxgb1rn6S8F725-wKky04MX0U2zjbmEdBn/exec';
+  // ────────────────────────────────────────────────────────────────────────────
 
   const labels = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
   const ratings = { doctor: 0, communication: 0, overall: 0 };
@@ -494,7 +499,7 @@
     try {
       await fetch(FEEDBACK_ENDPOINT, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({
           doctor_rating:        formatLine(ratings.doctor),
           doctor_tags:          getSelectedTags('doctor'),
@@ -502,8 +507,7 @@
           communication_tags:   getSelectedTags('communication'),
           overall_rating:       formatLine(ratings.overall),
           quick_notes:          comments || 'None',
-          contact_info:         contact || 'Anonymous',
-          _subject:             'SSONY Fast Feedback — ' + (contact || 'Anonymous')
+          contact_info:         contact || 'Anonymous'
         })
       });
     } catch (_) {}

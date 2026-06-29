@@ -107,6 +107,49 @@
       text-align: center;
     }
 
+    /* Doctor chip selector */
+    .doctor-block {
+      margin-bottom: 22px;
+    }
+
+    .doctor-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--header);
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .doctor-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .doctor-chip {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 22px;
+      padding: 10px 16px;
+      font-size: 14px;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.12s;
+      font-family: 'Inter', sans-serif;
+      touch-action: manipulation;
+      min-height: 42px;
+    }
+
+    .doctor-chip:hover {
+      border-color: var(--lavender);
+    }
+
+    .doctor-chip.selected {
+      background: var(--header);
+      color: #FFFFFF;
+      border-color: var(--header);
+    }
+
     /* Rating block */
     .rating-block {
       margin-bottom: 22px;
@@ -325,6 +368,17 @@
       <h1 class="heading">How did we do today?</h1>
       <p class="sub">Take 15 seconds to let us know how your visit went.</p>
 
+      <!-- Doctor Selection -->
+      <div class="doctor-block">
+        <span class="doctor-label">Who did you see today?</span>
+        <div class="doctor-chips">
+          <button type="button" class="doctor-chip" data-doctor="Dr. Amit Dhar">Dr. Amit Dhar</button>
+          <button type="button" class="doctor-chip" data-doctor="Dr. Jesse Doscher">Dr. Jesse Doscher</button>
+          <button type="button" class="doctor-chip" data-doctor="Dr. Victoria Rubinoff">Dr. Victoria Rubinoff</button>
+          <button type="button" class="doctor-chip" data-doctor="Not sure">Not sure</button>
+        </div>
+      </div>
+
       <!-- Doctor & Care -->
       <div class="rating-block">
         <div class="stars-row">
@@ -392,6 +446,16 @@
 
   const labels = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
   const ratings = { doctor: 0, communication: 0, overall: 0 };
+  let selectedDoctor = '';
+
+  // Doctor chip single-select
+  document.querySelectorAll('.doctor-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.doctor-chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      selectedDoctor = chip.dataset.doctor;
+    });
+  });
 
   // Tier-based tag sets
   // Excellent (5 stars) → exceptional, above-and-beyond
@@ -501,6 +565,7 @@
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({
+          doctor_seen:          selectedDoctor || 'Not specified',
           doctor_rating:        formatLine(ratings.doctor),
           doctor_tags:          getSelectedTags('doctor'),
           communication_rating: formatLine(ratings.communication),
